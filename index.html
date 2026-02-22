@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1">
+    <title>Auth System - Hoidir24</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+    <script src="https://unpkg.com/typeit@8.7.0/dist/index.umd.js"></script>
+    <link href="https://htmlku.com/kamumau/style.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-color: #ffd700;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --card-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            background: #0f172a;
+        }
+
+        /* --- UI Tambahan Hoidir24 --- */
+        .running-text {
+            position: fixed;
+            top: 10px; left: 0; width: 100%;
+            color: white; z-index: 1000;
+            font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #clock {
+            position: fixed; bottom: 15px; left: 15px;
+            color: white; font-size: 13px; font-weight: bold;
+            z-index: 1000; background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px; border-radius: 8px;
+        }
+
+        .footer-credits {
+            position: fixed; bottom: 15px; right: 15px;
+            text-align: right; color: white; z-index: 1000;
+        }
+
+        /* --- Form Login Glassmorphism --- */
+        #auth-container {
+            display: none; /* Muncul setelah amplop di klik */
+            position: relative;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 380px;
+            margin: 50px auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        .input-group { margin-bottom: 1.2rem; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-dim); }
+
+        input {
+            width: 100%; padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px; color: white;
+            box-sizing: border-box;
+        }
+
+        input:focus { outline: none; border-color: var(--primary); }
+
+        .btn-main {
+            width: 100%; padding: 12px;
+            background: var(--primary); color: white;
+            border: none; border-radius: 10px;
+            font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+
+        .link-text { color: var(--primary); cursor: pointer; font-size: 0.85rem; }
+        .hidden { display: none; }
+
+        #suratin img { width: 110px !important; cursor: pointer; transition: 0.3s; }
+        #suratin img:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body onload="updateClock()">
+
+    <div id="bodyblur">
+        <img src="https://feeldreams.github.io/pics/awan/2.jpg" id="wallpaper" />
+    </div>
+
+    <div class="running-text">
+        <marquee scrollamount="6">Selamat datang di website resmi hoidir24 ✨ Silahkan Login untuk melanjutkan! 🌈</marquee>
+    </div>
+
+    <div id="clock">00:00:00</div>
+
+    <div class="footer-credits">
+        <div style="font-size: 11px; font-weight: bold;">Created by hoidir24</div>
+        <div style="font-size: 9px; opacity: 0.7;">© 2026 Hak Cipta Dilindungi</div>
+    </div>
+
+    <div id='Content'>
+        <div id="suratin" onClick="mulaiAuth();">
+            <img src="https://rayyscoding.github.io/envelope.png" />
+        </div>
+        <p id="ket">Klik amplop untuk Masuk!</p>
+    </div>
+
+    <div id="auth-container">
+        <div class="auth-card">
+            <div id="login-section">
+                <h2 style="text-align: center; margin-top: 0;">Login</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Kata Sandi</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <div style="text-align: right; margin-bottom: 15px;">
+                        <span class="link-text" onclick="toggleSection('forgot-section')">Lupa Sandi?</span>
+                    </div>
+                    <button type="submit" id="btnLogin" class="btn-main">Masuk</button>
+                </form>
+                <p style="font-size: 0.85rem; text-align: center; color: #94a3b8;">
+                    Belum punya akun? <span class="link-text" onclick="toggleSection('register-section')">Daftar</span>
+                </p>
+            </div>
+
+            <div id="register-section" class="hidden">
+                <h2 style="text-align: center; margin-top: 0;">Daftar Akun</h2>
+                <form id="registerForm">
+                    <div class="input-group">
+                        <label>Email Baru</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Kata Sandi</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <button type="submit" id="btnReg" class="btn-main">Buat Akun</button>
+                </form>
+                <p style="font-size: 0.85rem; text-align: center; color: #94a3b8;">
+                    Sudah ada akun? <span class="link-text" onclick="toggleSection('login-section')">Masuk</span>
+                </p>
+            </div>
+
+            <div id="forgot-section" class="hidden">
+                <h2 style="text-align: center; margin-top: 0;">Reset Sandi</h2>
+                <form id="forgotForm">
+                    <div class="input-group">
+                        <label>Masukkan Email Terdaftar</label>
+                        <input type="email" id="resetEmail" required>
+                    </div>
+                    <button type="submit" id="btnReset" class="btn-main">Kirim Link</button>
+                </form>
+                <p style="font-size: 0.85rem; text-align: center; color: #94a3b8;">
+                    <span class="link-text" onclick="toggleSection('login-section')">Kembali ke Login</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEQPbyTMnAv5wKmPzSkoUxxt-troi1Zy4",
+            authDomain: "my-lacak.firebaseapp.com",
+            projectId: "my-lacak",
+            storageBucket: "my-lacak.firebasestorage.app",
+            messagingSenderId: "629191404429",
+            appId: "1:629191404429:web:b20db7a5455dd99a2f2bc4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Fungsi Global untuk Navigasi UI
+        window.toggleSection = (id) => {
+            const sections = ['login-section', 'register-section', 'forgot-section'];
+            sections.forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        };
+
+        // Mulai Auth setelah klik amplop
+        window.mulaiAuth = async () => {
+            document.getElementById('Content').style.display = "none";
+            document.getElementById('auth-container').style.display = "block";
+            
+            await Swal.fire({
+                title: 'Halo!',
+                text: 'Silahkan login atau daftar untuk lanjut ke konten hoidir24',
+                icon: 'info',
+                confirmButtonText: 'Siap!'
+            });
+        };
+
+        // --- Firebase Handlers ---
+        
+        // LOGIN
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            btn.innerText = "Sabar ya...";
+            try {
+                await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+                Swal.fire('Berhasil!', 'Selamat datang kembali', 'success');
+            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+            btn.innerText = "Masuk";
+        });
+
+        // REGISTER
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await createUserWithEmailAndPassword(auth, regEmail.value, regPassword.value);
+                Swal.fire('Sukses!', 'Akun dibuat, silakan login', 'success');
+                toggleSection('login-section');
+            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+        });
+
+        // FORGOT PASSWORD
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await sendPasswordResetEmail(auth, resetEmail.value);
+                Swal.fire('Terkirim!', 'Cek email kamu untuk reset sandi', 'info');
+                toggleSection('login-section');
+            } catch (err) { Swal.fire('Error', err.message, 'error'); }
+        });
+    </script>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = 
+                now.getHours().toString().padStart(2, '0') + ":" + 
+                now.getMinutes().toString().padStart(2, '0') + ":" + 
+                now.getSeconds().toString().padStart(2, '0');
+            setTimeout(updateClock, 1000);
+        }
+    </script>
+</body>
+                      </html>
+                      
